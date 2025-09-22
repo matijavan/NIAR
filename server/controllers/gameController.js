@@ -9,8 +9,13 @@ function throwCard(ws){
       let bacena_karta = karte[0]
       let karta_koja_treba_biti_bacena = gameState.dealt_cards[0]
 
-      //podelio ovo u fje al i s fjama je mnogo ružan kod
-      if(bacena_karta === karta_koja_treba_biti_bacena){
+      if(!bacena_karta){
+        ws.send(JSON.stringify({
+          type: "you_threw_all_cards"
+        }))
+      }
+      
+      else if(bacena_karta === karta_koja_treba_biti_bacena){
         correctCardIsThrown(ws, lobbies, lobbyId, gameState, player, karte, bacena_karta)
       }
 
@@ -28,7 +33,7 @@ function correctCardIsThrown(ws, lobbies, lobbyId, gameState, player, karte, bac
     type: "thrown_card_is_correct", 
     card : bacena_karta, 
     cards: player.cards_in_hand})
-  ) //šalji update useru koji je bacio kartu (treba update njegov deck i thrown card)
+  ) 
 
   lobbies[lobbyId].users_in_lobby.forEach(user => { //šalji update ostalim userima (netreba im update deck al treba update thrown_card )
     if (user.id !== ws.id) {
@@ -58,22 +63,24 @@ function wrongCardIsThrown(ws, lobbies, lobbyId, gameState, player, karte,
    bacena_karta, karta_koja_treba_biti_bacena){
     gameState.numberOfLives--;
     let playerWhoHadCorrectCardInHand =  gameState.players.find(p =>
-      p.cards_in_hand[0] === gameState.dealt_cards[0])
+    p.cards_in_hand[0] === gameState.dealt_cards[0])
 
     console.log(player.name, "je bacio kartu", bacena_karta)
     console.log(playerWhoHadCorrectCardInHand.name, "je imao kartu", gameState.dealt_cards[0])
+
     lobbies[lobbyId].users_in_lobby.forEach(user =>{
-      user.send(JSON.stringify({
-        type: "thrown_card_is_wrong", 
-        thrownCard : bacena_karta, 
-        shouldBeThrownCard: karta_koja_treba_biti_bacena, //TODO: feature thrown card is wrong, thrown card is X, should be thrown card is Y tako nešto (URAĐENO)
-        numberOfLives : gameState.numberOfLives, //ovo mi mozda ni netreba jer vec dobivam kroz generateLevel()
-        playerWhoThrewWrongCard: player.name, 
-        playerWhoHadCorrectCardInHand: playerWhoHadCorrectCardInHand.name
+    user.send(JSON.stringify({
+      type: "thrown_card_is_wrong", 
+      thrownCard : bacena_karta, 
+      shouldBeThrownCard: karta_koja_treba_biti_bacena, 
+      numberOfLives : gameState.numberOfLives, 
+      playerWhoThrewWrongCard: player.name, 
+      playerWhoHadCorrectCardInHand: playerWhoHadCorrectCardInHand.name
       }))
     })
     generateLevel(lobbyId)
-  }
+    }
+    
 
 module.exports = {
   throwCard

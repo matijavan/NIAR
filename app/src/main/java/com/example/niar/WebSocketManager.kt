@@ -24,6 +24,7 @@ object WebSocketManager {
     public var thrownCard : Int? = null
     public val thrownCardLiveData = MutableLiveData<Int>()
     public val thrownCardIsWrongLiveData = MutableLiveData<LinkedList<Pair<Int, String>>>()
+    public val gameOverLiveData = MutableLiveData<LinkedList<Pair<Int, String>>>()
     public var levelPassed : Boolean = false
     public val levelPassedLiveData = MutableLiveData<Boolean>()
     public var level : Int = 1
@@ -122,6 +123,10 @@ object WebSocketManager {
                             yourCardsLiveData.postValue(cardsList.sorted())
                         }
 
+                        else if(type == "you_threw_all_cards"){
+                            thrownCardLiveData.postValue(9999)
+                        }
+
                         else if(type == "other_player_threw"){
                             var thrown_card = json.getInt("card")
                             thrownCardLiveData.postValue(thrown_card)
@@ -170,7 +175,7 @@ object WebSocketManager {
     }
 
     fun create_lobby(){
-        val jsonString = "{\"type\":\"create_lobby\"}" //treba da bude jsonString kad saljemo serveru tako kaže chatgpt da je praksa
+        val jsonString = "{\"type\":\"create_lobby\"}"
         if(client?.isOpen == true){
             client?.send(jsonString)
         }

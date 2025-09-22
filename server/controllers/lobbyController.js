@@ -13,6 +13,8 @@ function ready(ws){
             user.send(JSON.stringify({type: "all_players_ready"}))
         })
     generateLevel(lobbyId)
+     
+    lobbies[lobbyId].users_that_are_ready.clear(); //da ne budu readyjani na restartu
     }
 
     else{

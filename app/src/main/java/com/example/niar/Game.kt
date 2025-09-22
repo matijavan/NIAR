@@ -1,5 +1,6 @@
 package com.example.niar
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Button
@@ -29,6 +30,7 @@ class Game : AppCompatActivity(){
 
         WebSocketManager.yourCardsLiveData.observe(this){ cards ->
             cards_in_hand.text = cards.joinToString(", ")
+            throw_card.isEnabled = cards.isNotEmpty()
         }
 
         throw_card.setOnClickListener{
@@ -36,7 +38,7 @@ class Game : AppCompatActivity(){
         }
 
         WebSocketManager.thrownCardLiveData.observe(this){
-            card -> thrown_card.text = card.toString()
+                card -> thrown_card.text = card.toString()
         }
 
         WebSocketManager.thrownCardIsWrongLiveData.observe(this) { array ->
@@ -44,18 +46,21 @@ class Game : AppCompatActivity(){
             var playerWhoThrewWrongCard = array[0].second
             var shouldBeThrownCard = array[1].first
             var playerWhoHadCorrectCardInHand = array[1].second
-            var builder = AlertDialog.Builder(this)
 
-            builder.setTitle("Wrong card thrown!")
+            var dialog = AlertDialog.Builder(this)
+                .setTitle("Wrong card thrown!")
                 .setMessage(
                     playerWhoThrewWrongCard + " threw " + thrownCard + "\n" +
                             playerWhoHadCorrectCardInHand + " had " + shouldBeThrownCard
                 )
-                .setCancelable(true)
-                .setPositiveButton("Ok") { dialogeInterface, it ->
-                    finish()
-                }
-                .show()
+                .setCancelable(false)
+                .create()
+
+            dialog.show()
+
+            dialog.window?.decorView?.postDelayed({
+                dialog.dismiss()
+            }, 3000)
         }
 
         WebSocketManager.roundGeneratorLiveData.observe(this){triple ->
@@ -64,11 +69,24 @@ class Game : AppCompatActivity(){
             thrown_card.text = "Throw the first card!"
             level.text = "Level " + levelTriple.toString()
             lives.text = "Lives " + livesTriple.toString()
+
+            throw_card.isEnabled = cardsListTriple.isNotEmpty()
         }
 
         WebSocketManager.levelLiveData.observe(this){ level ->
-            thrown_card.text = "Congratulations, you passed level " + level
-            thrown_card.text = "Throw the first card!"
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Level passed!")
+                .setMessage(
+                    "Congratulations, you passed level " + level
+                )
+                .setCancelable(false)
+                .create()
+
+            dialog.show()
+
+            dialog.window?.decorView?.postDelayed({
+                dialog.dismiss()
+            }, 3000)
         }
 
     }

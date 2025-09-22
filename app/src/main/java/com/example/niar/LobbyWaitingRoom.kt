@@ -32,6 +32,7 @@ class LobbyWaitingRoom: AppCompatActivity() {
         var ready = findViewById<Button>(R.id.ready)
         var leave_lobby = findViewById<Button>(R.id.leave_lobby)
         var ready_count = findViewById<TextView>(R.id.ready_count)
+        var isReady : Boolean = false
 
         fun updateLobbyUI() {
             lobbyId.text = "Lobby ID: ${WebSocketManager.lobbyId ?: ""}"
@@ -49,14 +50,15 @@ class LobbyWaitingRoom: AppCompatActivity() {
             Log.d("DEBUG", "updatean lobbyUI ")
         }
 
-        WebSocketManager.all_players_readyLiveData.observe(this){ ready ->
-            if (ready == true) {
+        WebSocketManager.all_players_readyLiveData.observe(this){ readyy ->
+            if (readyy == true) {
+                isReady = false;
+                ready.text = "Ready"
                 val intent = Intent(this, Game::class.java)
                 startActivity(intent)
             }
         }
 
-        var isReady : Boolean = false
 
         ready.setOnClickListener(){
             if(isReady == false){
